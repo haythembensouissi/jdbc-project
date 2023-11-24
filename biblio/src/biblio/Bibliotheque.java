@@ -15,12 +15,35 @@ public class Bibliotheque {
 			return connection;
 		
 	}
-	Scanner scanner=new Scanner(System.in);
-	  public boolean validate(String username, String password,String role) {
-        String query = "SELECT * FROM utilisateur WHERE login = ? AND pwd = ?";
+	public String[] obtenirauthentification(String login, String pwd,Connection connection){
+		String[] auth=new String[3];
+		try (PreparedStatement ps = connection.prepareStatement("SELECT nom,prenom,role FROM utilisateur WHERE login = ? AND pwd = ?")) {
+			ps.setString(1, login);
+			ps.setString(2, pwd);
+			try (ResultSet rs=ps.executeQuery()){
+				if (rs.next()) {
+					auth[0]=rs.getString("nom");
+			auth[1]=rs.getString("prenom");
+			auth[2]=rs.getString("role");
+				}
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		} catch (SQLException e) {
+			
+			e.printStackTrace();
+		}
 		
-        boolean isValid = false;
+		
+		return auth;
+	}
 
+	Scanner scanner=new Scanner(System.in);
+	  public boolean validate(String username, String password) {
+        String query = "SELECT * FROM utilisateur WHERE login = ? AND pwd = ?";
+        boolean isValid = false;
         try (Connection connection= connecter();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -29,10 +52,7 @@ public class Bibliotheque {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                  role=resultSet.getString("role");
                     isValid = true;
-					System.out.println("welcome mr le "+role);
-					
                 }
             }
 
@@ -42,22 +62,23 @@ public class Bibliotheque {
 
        return isValid;
     }
-	public boolean authentifier(String role){ 
+	public String[] authentifier(){ 
 		
-		System.out.println("entrer votre login");
-           String login= scanner.nextLine();
-            System.out.println("entrer votre mot de passe");
-           String pwd= scanner.nextLine();
-           System.out.println(role);
-		while(!validate(login, pwd,role)){
-			System.out.println("entrer votre login");
+		String login;
+		String pwd;
+System.out.println("entrer votre login");
+Connection connection=connecter();
             login= scanner.nextLine();
             System.out.println("entrer votre mot de passe");
            pwd= scanner.nextLine();
-          
-
+		if(validate(login, pwd)){
+			return obtenirauthentification(login,pwd,connection);
 		}
-		return true;
+		else{
+			return authentifier();
+		}
+		
+		
 		
 	}
 	public void menu(){
@@ -67,21 +88,20 @@ public class Bibliotheque {
 
 	}
 public static void main(String[]args) {
-	Scanner scanner=new Scanner(System.in);
+	
 	Bibliotheque biblio= new Bibliotheque();
-	String role="";
+	
+	String[] arr=new String[3];
 	try {
 		 Class.forName("com.mysql.jdbc.Driver");
-		boolean estAuthentifie=biblio.authentifier(role);
+		arr=biblio.authentifier();
+		System.out.println(arr[0]);
+		System.out.println(arr[1]);
+		System.out.println(arr[2]);
+
 		
 		
-if(estAuthentifie){
-	
-	
-	if (role=="etudiant"){
-		biblio.menu();
-	}
-}
+
 		
 		
 	}
