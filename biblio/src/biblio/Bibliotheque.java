@@ -1,8 +1,10 @@
 package biblio;
 import java.sql.*;
 import java.util.*;
+
+import com.mysql.cj.util.Util;
 public class Bibliotheque {
-	public Connection connecter(){
+	public static Connection connecter(){
 		
 			Connection connection;
 			connection=null;
@@ -14,16 +16,19 @@ public class Bibliotheque {
 			}
 			return connection;
 	}
-	public String[] obtenirauthentification(String login, String pwd,Connection connection){
-		String[] auth=new String[3];
-		try (PreparedStatement ps = connection.prepareStatement("SELECT nom,login,role FROM utilisateur WHERE login = ? AND pwd = ?")) {
+	public static Utilisateur obtenirauthentification(String login, String pwd,Connection connection){
+		Utilisateur user=new Utilisateur();
+		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM utilisateur WHERE login = ? AND pwd = ?")) {
 			ps.setString(1, login);
 			ps.setString(2, pwd);
 			try (ResultSet rs=ps.executeQuery()){
 				if (rs.next()) {
-					auth[0]=rs.getString("nom");
-			auth[1]=rs.getString("login");
-			auth[2]=rs.getString("role");
+				user.id=rs.getInt(1);
+				user.nom=rs.getString("nom");
+			user.login=rs.getString("login");
+			user.prenom=rs.getString("prenom");
+			user.pwd=rs.getString("pwd");
+			user.role=rs.getString("role");
 				}
 			
 			
@@ -36,11 +41,11 @@ public class Bibliotheque {
 		}
 		
 		
-		return auth;
+		return user;
 	}
 
-	Scanner scanner=new Scanner(System.in);
-	  public boolean validate(String username, String password) {
+	static Scanner scanner=new Scanner(System.in);
+	  public static boolean validate(String username, String password) {
         String query = "SELECT * FROM utilisateur WHERE login = ? AND pwd = ?";
         boolean isValid = false;
         try (Connection connection= connecter();
@@ -61,7 +66,7 @@ public class Bibliotheque {
 
        return isValid;
     }
-	public String[] authentifier(){ 
+	public static  Utilisateur authentifier(){ 
 		
 		String login;
 		String pwd;
@@ -80,7 +85,66 @@ Connection connection=connecter();
 		
 		
 	}
-	public void rechercherunlivre(){
+	public boolean rechercherunlivre(){
+		Scanner scanner=new Scanner(System.in);
+		System.out.println("entrer l'id");
+		int id=scanner.nextInt();
+		Connection connection=connecter();
+		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM LIVRE WHERE id_livre=?")) {
+			ps.setInt(1, id);
+		ResultSet rs=ps.executeQuery();
+		if(rs.next()){
+			System.out.println("le livre existe");
+			return true;
+			
+		}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("le livre n'existe pas");
+		}
+
+		return false;
+	}
+	public void menuEtudiantEnseignant(){		
+		int choix;
+			System.out.println("1:consulter le catalogue");
+		System.out.println("2:Rechercher un livre");
+		System.out.println("3:Afficher les details d'un livre");
+		System.out.println("4:consulter l'historique des livres empruntes");	
+		System.out.println("entrer votre choix");
+		 choix=scanner.nextInt();
+			switch(choix){
+	
+	case 1:
+	System.out.println("consultation du catalogue");
+	break;
+	case 2:
+	rechercherunlivre();
+	break;
+	case 3:
+	System.out.println(" affiche des details");
+	break;
+	case 4:
+	System.out.println("historique des emprunts");
+	break;
+	case 0:
+	System.exit(1);
+
+}
+			if(choix!=0){
+		menuEtudiantEnseignant();
+	}
+	}
+
+	
+	public void menuBibliothequaire(){
+		System.out.println("1: Notification par e-mail pour les rappels de retour");
+		System.out.println("2: Generation des rapports statistiques");
+
+
+	}
+public void afficherdetails(){
 		Scanner scanner=new Scanner(System.in);
 		System.out.println("entrer l'id");
 		int id=scanner.nextInt();
@@ -101,49 +165,6 @@ Connection connection=connecter();
 			
 		}
 		
-	}
-	public void menuEtudiantEnseignant(){
-		
-		int choix;
-		
-		
-
-		
-			System.out.println("1:consulter le catalogue");
-		System.out.println("2:Rechercher un livre");
-		System.out.println("3:Afficher les details d'un livre");
-		System.out.println("4:consulter l'historique des livres empruntes");	
-		System.out.println("entrer votre choix");
-		 choix=scanner.nextInt();
-			switch(choix){
-	
-	case 1:
-	System.out.println("consultation du livre");
-	break;
-	case 2:
-	rechercherunlivre();
-	break;
-	case 3:
-	rechercherunlivre();
-	break;
-	case 4:
-	historiquedesemprunts();
-	break;
-	case 0:
-	System.exit(1);
-
-}
-			if(choix!=0){
-		menuEtudiantEnseignant();
-	}
-	}
-
-	
-	public void menuBibliothequaire(){
-		System.out.println("1: Notification par e-mail pour les rappels de retour");
-		System.out.println("2: Generation des rapports statistiques");
-
-
 	}
 public void historiquedesemprunts(){
 	Connection connection=connecter();
@@ -175,24 +196,19 @@ public void historiquedesemprunts(){
 	}
 }
 public static void main(String[]args) {
-	
 	Bibliotheque biblio= new Bibliotheque();
-	
-	String[] arr=new String[3];
+	Utilisateur user=new Utilisateur();
 	try {
 		 Class.forName("com.mysql.cj.jdbc.Driver");
-		arr=biblio.authentifier();
-		
-		if(arr[2].equals("etudiant")){
+		user=authentifier();
+		System.out.println(user.role);
+		if(user.role.equals("etudiant")|| user.role.equals("enseignant")){
 			biblio.menuEtudiantEnseignant();
 			
 		}
 		else{
-
+			biblio.menuBibliothequaire();
 		}
-		
-
-		
 	}
 	catch(Exception e) {
 		System.out.println(e);
