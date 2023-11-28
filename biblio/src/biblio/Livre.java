@@ -46,11 +46,15 @@ public class Livre {
         this.disponibilite = disponibilite;
     }
     public void Afficher() {
-        System.out.println(this.idLivre);
-        System.out.println(this.titre);
-        System.out.println(this.auteur);
-        System.out.println(this.genre);
-        System.out.println(this.disponibilite);
+        System.out.println("l'id: "+this.idLivre);
+
+        System.out.println("le titre: "+this.titre);
+
+        System.out.println("l'auteur: "+this.auteur);
+
+        System.out.println("le genre: "+this.genre);
+
+       
     }
     
 }
