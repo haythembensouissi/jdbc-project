@@ -1,6 +1,8 @@
 package biblio;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
+import java.time.*;
 
 import com.mysql.cj.util.Util;
 public class Bibliotheque {
@@ -30,8 +32,7 @@ public class Bibliotheque {
 			user.pwd=rs.getString("pwd");
 			user.role=rs.getString("role");
 				}
-			
-			
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -85,28 +86,28 @@ Connection connection=connecter();
 		
 		
 	}
-	public boolean rechercherunlivre(){
+	public Livre rechercherunlivre(){
 		Scanner scanner=new Scanner(System.in);
 		System.out.println("entrer l'id");
 		int id=scanner.nextInt();
 		Connection connection=connecter();
+		Livre livre=new Livre();
 		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM LIVRE WHERE id_livre=?")) {
 			ps.setInt(1, id);
 		ResultSet rs=ps.executeQuery();
 		if(rs.next()){
-			System.out.println("le livre existe");
-			return true;
+			livre.setAuteur(rs.getString("auteur"));
+			livre.setGenre(rs.getString("genre"));
 			
 		}
-			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.out.println("le livre n'existe pas");
 		}
 
-		return false;
+		return null;
 	}
-	public void menuEtudiantEnseignant(){		
+	public void menuEtudiantEnseignant(Utilisateur user){		
 		int choix;
 			System.out.println("1:consulter le catalogue");
 		System.out.println("2:Rechercher un livre");
@@ -117,7 +118,7 @@ Connection connection=connecter();
 			switch(choix){
 	
 	case 1:
-	System.out.println("consultation du catalogue");
+	ConsulterCatalogue(connecter());
 	break;
 	case 2:
 	rechercherunlivre();
@@ -126,73 +127,93 @@ Connection connection=connecter();
 	System.out.println(" affiche des details");
 	break;
 	case 4:
-	System.out.println("historique des emprunts");
+	gestionempruntretour(user);
 	break;
 	case 0:
 	System.exit(1);
 
 }
 			if(choix!=0){
-		menuEtudiantEnseignant();
+		menuEtudiantEnseignant(user);
 	}
 	}
 
-	
+
 	public void menuBibliothequaire(){
 		System.out.println("1: Notification par e-mail pour les rappels de retour");
 		System.out.println("2: Generation des rapports statistiques");
 
 
 	}
-public void afficherdetails(){
-		Scanner scanner=new Scanner(System.in);
-		System.out.println("entrer l'id");
-		int id=scanner.nextInt();
-		Connection connection=connecter();
-		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM LIVRE WHERE id_livre=?")) {
-			ps.setInt(1, id);
-		ResultSet rs=ps.executeQuery();
-		if(rs.next()){
-			System.out.println("titre : "+rs.getString("titre"));
-			System.out.println("auteur : "+rs.getString("auteur"));
-			System.out.println("genre : "+rs.getString("genre"));
-			System.out.println("disponibilité : "+rs.getString("disponibilité"));
-			
+private static Livre[] ConsulterCatalogue(Connection connection) {
+	Livre[] cat = new Livre[100];
+    String query = "SELECT * FROM Livre";
+    try (Statement statement = connection.createStatement();
+         ResultSet resultSet = statement.executeQuery(query)) {
+    	int i=0;
+        while (resultSet.next()) {
+            Livre livre = new Livre();
+            livre.setIdLivre(resultSet.getInt("id_livre"));
+            livre.setTitre(resultSet.getString("titre"));
+            livre.setAuteur(resultSet.getString("auteur"));
+            livre.setGenre(resultSet.getString("genre"));
+            livre.setDisponibilite(resultSet.getBoolean("disponibilité"));
+            cat[i]=livre;
+            i++;
+        }
+		for(int j=0;j<i;j++){
+			System.out.println(cat[j].getTitre());
+			System.out.println(cat[j].getAuteur());
+			System.out.println(cat[j].getGenre());
 		}
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-			
-		}
-		
-	}
-public void historiquedesemprunts(){
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return cat;
+}
+public void emprunter(Utilisateur user){
 	Connection connection=connecter();
-	try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM emprunt")) {
-		ResultSet rs=ps.executeQuery();
-		
-				while (rs.next()) {
-					try (PreparedStatement ps2=connection.prepareStatement("SELECT * from utilisateur WHERE id_utilisateur= ?")) {
-			ps2.setInt(1,rs.getInt(5)); 
-				ResultSet rs2=ps2.executeQuery();
-				if(rs2.next()){
-					System.out.println("id emprunt :"+rs.getInt(1));
-			System.out.println("date emprunt :"+rs.getDate(2));
-			System.out.println("date retour :"+rs.getDate(3));
-			System.out.println("status:"+rs.getString(4));
-			System.out.println("id utilisateur :"+rs.getInt(5));
-			System.out.println("id livre :"+rs.getInt(6));
-			System.out.println("emprunte par :"+rs2.getString("nom"));
-				}
-			
-		
-		}
+System.out.println("entrer l'id de livre");
+int id=scanner.nextInt();
+try (PreparedStatement ps1 = connection.prepareStatement("SELECT * from emprunt WHERE id_livre=?")) {
+	ps1.setInt(1,id);
+	ResultSet rs=ps1.executeQuery();
+	if (!rs.next()||rs.getString("status").equals("en cours")){
+		System.out.println("livre en cours d'emprunte");
+	}
+	else{
+try (PreparedStatement ps = connection.prepareStatement("INSERT INTO emprunt (date_emprunt,date_retour,status,id_utilisateur,id_livre) values (?,?,?,?,?) ")) {
+		ps.setObject(1, LocalDate.now());
+		ps.setObject(2, LocalDate.now().plusMonths(1));
+		ps.setString(3, "en cours");
+		ps.setInt(4, user.id);
+		ps.setInt(5, id);
+		ps.executeUpdate();
 
-		} 
-		
 	} catch (SQLException e) {
 		
 		e.printStackTrace();
+	}
+	}
+} catch (SQLException e1) {
+	e1.printStackTrace();
+	
+}
+
+	
+}
+public void gestionempruntretour(Utilisateur user){
+	System.out.println("1:emprunter un livre");
+	System.out.println("2:retourner un livre");
+	int choix=scanner.nextInt();
+	switch (choix) {
+		case 1:
+		emprunter(user);
+		break;
+	
+		case 2:
+		System.out.println("retour");
+		break;
 	}
 }
 public static void main(String[]args) {
@@ -203,7 +224,7 @@ public static void main(String[]args) {
 		user=authentifier();
 		System.out.println(user.role);
 		if(user.role.equals("etudiant")|| user.role.equals("enseignant")){
-			biblio.menuEtudiantEnseignant();
+			biblio.menuEtudiantEnseignant(user);
 			
 		}
 		else{
