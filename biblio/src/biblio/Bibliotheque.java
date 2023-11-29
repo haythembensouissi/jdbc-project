@@ -18,103 +18,12 @@ public class Bibliotheque {
 			}
 			return connection;
 	}
-	public static Utilisateur obtenirauthentification(String login, String pwd,Connection connection){
-		Utilisateur user=new Utilisateur();
-		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM utilisateur WHERE login = ? AND pwd = ?")) {
-			ps.setString(1, login);
-			ps.setString(2, pwd);
-			try (ResultSet rs=ps.executeQuery()){
-				if (rs.next()) {
-				user.id=rs.getInt(1);
-				user.nom=rs.getString("nom");
-			user.login=rs.getString("login");
-			user.prenom=rs.getString("prenom");
-			user.pwd=rs.getString("pwd");
-			user.role=rs.getString("role");
-				}
-		
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		} catch (SQLException e) {
-			
-			e.printStackTrace();
-		}
-		
-		
-		return user;
-	}
+
 
 	static Scanner scanner=new Scanner(System.in);
-	  public static boolean validate(String username, String password) {
-        String query = "SELECT * FROM utilisateur WHERE login = ? AND pwd = ?";
-        boolean isValid = false;
-        try (Connection connection= connecter();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-            preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
 
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    isValid = true;
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace(); 
-        }
-
-       return isValid;
-    }
-	public static  Utilisateur authentifier(){ 
-		
-		String login;
-		String pwd;
-System.out.println("entrer votre login");
-Connection connection=connecter();
-            login= scanner.nextLine();
-            System.out.println("entrer votre mot de passe");
-           pwd= scanner.nextLine();
-		if(validate(login, pwd)){
-			return obtenirauthentification(login,pwd,connection);
-		}
-		else{
-			return authentifier();
-		}
-		
-		
-		
-	}
-	public Livre rechercherunlivre(){
-		Scanner scanner=new Scanner(System.in);
-		System.out.println("entrer l'id");
-		int id=scanner.nextInt();
-		Connection connection=connecter();
-		Livre livre=new Livre();
-		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM LIVRE WHERE id_livre=?")) {
-			ps.setInt(1, id);
-		ResultSet rs=ps.executeQuery();
-		if(rs.next()){
-			livre.setTitre(rs.getString("titre"));
-			livre.setAuteur(rs.getString("auteur"));
-			livre.setGenre(rs.getString("genre"));
-			livre.Afficher();
-			if (rs.getBoolean("disponibilité")==true) {
-				System.out.println("le livre existe");
-			}
-			else{
-				System.out.println("le livre n'existe pas");
-			}
-		}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			System.out.println("le livre n'existe pas");
-		}
-
-		return null;
-	}
-	public void menuEtudiantEnseignant(Utilisateur user){		
+	public void menuEtudiantEnseignant(Utilisateur user,Livre livre,Emprunt emprunt){		
 		int choix;
 			System.out.println("1:consulter le catalogue");
 		System.out.println("2:Rechercher un livre");
@@ -125,23 +34,23 @@ Connection connection=connecter();
 			switch(choix){
 	
 	case 1:
-	ConsulterCatalogue(connecter());
+	livre.ConsulterCatalogue(connecter());
 	break;
 	case 2:
-	rechercherunlivre();
+	livre.rechercherunlivre();
 	break;
 	case 3:
 	System.out.println(" affiche des details");
 	break;
 	case 4:
-	gestionempruntretour(user);
+	emprunt.gestionempruntretour(user);
 	break;
 	case 0:
 	System.exit(1);
 
 }
 			if(choix!=0){
-		menuEtudiantEnseignant(user);
+		menuEtudiantEnseignant(user,livre,emprunt);
 	}
 	}
 
@@ -160,32 +69,7 @@ Connection connection=connecter();
 		}
 
 	}
-private static Livre[] ConsulterCatalogue(Connection connection) {
-	Livre[] cat = new Livre[100];
-    String query = "SELECT * FROM Livre";
-    try (Statement statement = connection.createStatement();
-         ResultSet resultSet = statement.executeQuery(query)) {
-    	int i=0;
-        while (resultSet.next()) {
-            Livre livre = new Livre();
-            livre.setIdLivre(resultSet.getInt("id_livre"));
-            livre.setTitre(resultSet.getString("titre"));
-            livre.setAuteur(resultSet.getString("auteur"));
-            livre.setGenre(resultSet.getString("genre"));
-            livre.setDisponibilite(resultSet.getBoolean("disponibilité"));
-            cat[i]=livre;
-            i++;
-        }
-		for(int j=0;j<i;j++){
-			System.out.println(cat[j].getTitre());
-			System.out.println(cat[j].getAuteur());
-			System.out.println(cat[j].getGenre());
-		}
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return cat;
-}
+
 public void retourner(Utilisateur user){
 	Connection connection=connecter();
 	System.out.println("entrer l'id de livre");
@@ -258,12 +142,15 @@ public void gestionempruntretour(Utilisateur user){
 public static void main(String[]args) {
 	Bibliotheque biblio= new Bibliotheque();
 	Utilisateur user=new Utilisateur();
+	Livre livre=new Livre();
+	Emprunt emprunt=new Emprunt();
+	
 	try {
 		 Class.forName("com.mysql.cj.jdbc.Driver");
-		user=authentifier();
-		System.out.println(user.role);
-		if(user.role.equals("etudiant")|| user.role.equals("enseignant")){
-			biblio.menuEtudiantEnseignant(user);
+		user.connecter();
+		Utilisateur utilisateur=user.authentifier();		
+		if(utilisateur.role.equals("etudiant")|| utilisateur.role.equals("enseignant")){
+			biblio.menuEtudiantEnseignant(utilisateur,livre,emprunt);
 			
 		}
 		else{
