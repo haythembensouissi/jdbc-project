@@ -95,7 +95,7 @@ public void retourner(Utilisateur user){
 	System.out.println("entrer l'id de livre");
 int id=scanner.nextInt();
 boolean terminé=false;
-try (PreparedStatement ps=connection.prepareStatement("SELECT * FROM emprunt WHERE id_livre=?")) {
+try (PreparedStatement ps=connection.prepareStatement("SELECT * FROM emprunt WHERE  id_livre=? and status='en cours'")) {
 	ps.setInt(1, id);
 	ResultSet rs=ps.executeQuery();
     
@@ -117,7 +117,7 @@ if(!rs.next()||rs.getString("status").equals("terminé")){
 		}
 	}
 } catch (SQLException e) {
-	System.out.println(e);
+	System.out.println("pas de livre emprunté");
 }
 }
 }

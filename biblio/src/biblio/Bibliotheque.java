@@ -70,75 +70,8 @@ public class Bibliotheque {
 
 	}
 
-public void retourner(Utilisateur user){
-	Connection connection=connecter();
-	System.out.println("entrer l'id de livre");
-int id=scanner.nextInt();
-try (PreparedStatement ps=connection.prepareStatement("SELECT * FROM emprunt WHERE id_livre=?")) {
-	ps.setInt(1, id);
-	ResultSet rs=ps.executeQuery();
-	if(!rs.next()||rs.getString("status").equals("terminé")){
-		System.out.println("le livre n'est pas emprunté");
-	}
-	else{
-			int idemprunt=rs.getInt(1);
-			try (PreparedStatement ps1=connection.prepareStatement("UPDATE emprunt SET status='terminé' WHERE id_emprunt= ?")) {
-			
-			ps1.setInt(1, idemprunt);
-			ps1.executeUpdate();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-	}
-} catch (SQLException e) {
-	System.out.println(e);
-}
-}
-public void emprunter(Utilisateur user){
-	Connection connection=connecter();
-System.out.println("entrer l'id de livre");
-int id=scanner.nextInt();
-try (PreparedStatement ps1 = connection.prepareStatement("SELECT * from emprunt WHERE id_livre=?")) {
-	ps1.setInt(1,id);
-	ResultSet rs=ps1.executeQuery();
-	if (!rs.next()||rs.getString("status").equals("en cours")){
-		System.out.println("livre en cours d'emprunte");
-	}
-	else{
-try (PreparedStatement ps = connection.prepareStatement("INSERT INTO emprunt (date_emprunt,date_retour,status,id_utilisateur,id_livre) values (?,?,?,?,?) ")) {
-		ps.setObject(1, LocalDate.now());
-		ps.setObject(2, LocalDate.now().plusMonths(1));
-		ps.setString(3, "en cours");
-		ps.setInt(4, user.id);
-		ps.setInt(5, id);
-		ps.executeUpdate();
 
-	} catch (SQLException e) {
-		
-		e.printStackTrace();
-	}
-	}
-} catch (SQLException e1) {
-	e1.printStackTrace();
-	
-}
 
-	
-}
-public void gestionempruntretour(Utilisateur user){
-	System.out.println("1:emprunter un livre");
-	System.out.println("2:retourner un livre");
-	int choix=scanner.nextInt();
-	switch (choix) {
-		case 1:
-		emprunter(user);
-		break;
-	
-		case 2:
-		retourner(user);
-		break;
-	}
-}
 public static void main(String[]args) {
 	Bibliotheque biblio= new Bibliotheque();
 	Utilisateur user=new Utilisateur();
