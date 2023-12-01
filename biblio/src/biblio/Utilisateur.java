@@ -3,10 +3,49 @@ package biblio;
 import java.sql.*; 
 import java.util.*;
 public class Utilisateur {
-    public int id;
-   public String nom,prenom,login,pwd,role;
+    private int id;
+   private String nom;
+   private String prenom;
+   private String login;
+   private String pwd;
+   private String role;
    	static Scanner scanner=new Scanner(System.in);
-
+public void setid(int id){
+	this.id=id;
+}
+public void setnom(String nom){
+	this.nom=nom;
+}
+public void setprenom(String prenom){
+	this.prenom=prenom;
+}
+public void setlogin(String login){
+	this.login=login;
+}
+public void setpwd(String pwd){
+	this.pwd=pwd;
+}
+public void setrole(String role){
+	this.role=role;
+}
+public int getid(){
+return this.id;
+}
+public String getlogin(){
+	return this.login;
+}
+public String getpwd(){
+	return this.pwd;
+}
+public String getrole(){
+	return this.role;
+}
+public String getnom(){
+	return this.nom;
+}
+public String getprenom(){
+	return this.prenom;
+}
    public static Connection connecter(){
 		
 			Connection connection;
@@ -47,12 +86,12 @@ public class Utilisateur {
 			ps.setString(2, pwd);
 			try (ResultSet rs=ps.executeQuery()){
 				if (rs.next()) {
-				user.id=rs.getInt(1);
-				user.nom=rs.getString("nom");
-			user.login=rs.getString("login");
-			user.prenom=rs.getString("prenom");
-			user.pwd=rs.getString("pwd");
-			user.role=rs.getString("role");
+				user.setid(rs.getInt(1));;
+				user.setnom(rs.getString("nom"));
+			user.setlogin(rs.getString("login"));
+			user.setprenom(rs.getString("prenom"));
+			user.setpwd(rs.getString("pwd"));
+			user.setrole(rs.getString("role"));
 				}
 		
 		} catch (Exception e) {

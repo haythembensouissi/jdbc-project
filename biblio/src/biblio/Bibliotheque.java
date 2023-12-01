@@ -28,7 +28,8 @@ public class Bibliotheque {
 			System.out.println("1:consulter le catalogue");
 		System.out.println("2:Rechercher un livre");
 		System.out.println("3:Afficher les details d'un livre");
-		System.out.println("4:emprunter ou retourner un livre");	
+		System.out.println("4:emprunter ou retourner un livre");
+		System.out.println("5:consulter l'historique des emprunts");	
 		System.out.println("entrer votre choix");
 		 choix=scanner.nextInt();
 			switch(choix){
@@ -44,6 +45,9 @@ public class Bibliotheque {
 	break;
 	case 4:
 	emprunt.gestionempruntretour(user);
+	break;
+	case 5:
+	emprunt.historiquedesemprunts(user);
 	break;
 	case 0:
 	System.exit(1);
@@ -82,7 +86,7 @@ public static void main(String[]args) {
 		 Class.forName("com.mysql.cj.jdbc.Driver");
 		user.connecter();
 		Utilisateur utilisateur=user.authentifier();		
-		if(utilisateur.role.equals("etudiant")|| utilisateur.role.equals("enseignant")){
+		if(utilisateur.getrole().equals("etudiant")|| utilisateur.getrole().equals("enseignant")){
 			biblio.menuEtudiantEnseignant(utilisateur,livre,emprunt);
 			
 		}
