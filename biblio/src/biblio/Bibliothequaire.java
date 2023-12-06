@@ -6,11 +6,11 @@ public class Bibliothequaire extends Utilisateur {
     Bibliothequaire(){
         super();
     }
-    public void genererdesrapports(){
+    public Rapport genererdesrapports(){
         Connection connection=connecter();
+        Rapport rapport=new Rapport();
         try (PreparedStatement ps =connection.prepareStatement("SELECT id_livre,COUNT(*) as rowcount FROM emprunt group by id_livre order by rowcount ")) {
             ResultSet rs=ps.executeQuery();
-            Emprunt[] res=new Emprunt[100];
             int id=0;
            if(rs.next()){
 
@@ -22,7 +22,8 @@ public class Bibliothequaire extends Utilisateur {
             ps1.setInt(1, id);
             ResultSet rs1= ps1.executeQuery();
             if(rs1.next()){
-                System.out.println("le livre le plus emprunté est "+rs1.getString("titre"));
+                rapport.setnomlivre(rs1.getString("titre"));
+                System.out.println("le livre le plus emprunté est "+rapport.getnomlivre());
             }
            } catch (Exception e) {
             // TODO: handle exception
@@ -41,7 +42,8 @@ public class Bibliothequaire extends Utilisateur {
                 ps1.setInt(1, id);
                 ResultSet rs1=ps1.executeQuery();
                 if(rs1.next()){
-                    System.out.println("l'utilisateur qui a plus emprunté des livres est "+rs1.getString(1));
+                    rapport.setnomutilisateur(rs1.getString("nom"));
+                    System.out.println("l'utilisateur qui a plus emprunté des livres est "+rapport.getnomutilisateur());
                 }
                 
             } catch (Exception e) {
@@ -51,5 +53,6 @@ public class Bibliothequaire extends Utilisateur {
         } catch (Exception e) {
             // TODO: handle exception
         }
+        return rapport;
     }
 }
