@@ -50,13 +50,13 @@ public class Livre {
         this.disponibilite = disponibilite;
     }
     public void Afficher() {
-        System.out.println("l'id: "+this.idLivre);
+        System.out.print("l'id: "+this.idLivre+" ");
 
-        System.out.println("le titre: "+this.titre);
+        System.out.print("le titre: "+this.titre+" ");
 
-        System.out.println("l'auteur: "+this.auteur);
+        System.out.print("l'auteur: "+this.auteur+" ");
 
-        System.out.println("le genre: "+this.genre);
+        System.out.println("le genre: "+this.genre+" ");
 
        
     }
@@ -89,9 +89,9 @@ public class Livre {
             i++;
         }
 		for(int j=0;j<i;j++){
-			System.out.println(cat[j].getTitre());
-			System.out.println(cat[j].getAuteur());
-			System.out.println(cat[j].getGenre());
+			System.out.print("titre :"+cat[j].getTitre()+" ");
+			System.out.print("auteur :"+cat[j].getAuteur()+" ");
+			System.out.println("genre :"+cat[j].getGenre());
 		}
     } catch (SQLException e) {
         e.printStackTrace();

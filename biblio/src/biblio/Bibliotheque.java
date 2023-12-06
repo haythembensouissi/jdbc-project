@@ -41,7 +41,7 @@ public class Bibliotheque {
 	livre.rechercherunlivre();
 	break;
 	case 3:
-	System.out.println(" affiche des details");
+	livre.rechercherunlivre();
 	break;
 	case 4:
 	emprunt.gestionempruntretour(user);
@@ -59,19 +59,20 @@ public class Bibliotheque {
 	}
 
 
-	public void menuBibliothequaire(){
+	public void menuBibliothequaire(Bibliothequaire bibliothequaire){
 		System.out.println("1: Notification par e-mail pour les rappels de retour");
 		System.out.println("2: Generation des rapports statistiques");
 		int choix=scanner.nextInt();
 		switch (choix) {
 			case 1:
-				
 				break;
-		
 			case 2:
+			bibliothequaire.genererdesrapports();
 				break;
 		}
-
+if(choix !=0){
+	menuBibliothequaire(bibliothequaire);
+}
 	}
 
 
@@ -81,7 +82,7 @@ public static void main(String[]args) {
 	Utilisateur user=new Utilisateur();
 	Livre livre=new Livre();
 	Emprunt emprunt=new Emprunt();
-	
+	Bibliothequaire bibliothequaire=new Bibliothequaire();
 	try {
 		 Class.forName("com.mysql.cj.jdbc.Driver");
 		user.connecter();
@@ -91,7 +92,7 @@ public static void main(String[]args) {
 			
 		}
 		else{
-			biblio.menuBibliothequaire();
+			biblio.menuBibliothequaire(bibliothequaire);
 		}
 	}
 	catch(Exception e) {
