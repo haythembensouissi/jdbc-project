@@ -3,6 +3,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 import java.time.*;
+import javax.swing.JFrame;
 
 import com.mysql.cj.util.Util;
 public class Bibliotheque {
@@ -23,7 +24,7 @@ public class Bibliotheque {
 	static Scanner scanner=new Scanner(System.in);
 
 
-	public void menuEtudiantEnseignant(Utilisateur user,Livre livre,Emprunt emprunt){		
+	public void menuEtudiantEnseignant(Utilisateur user,Livre livre,Emprunt emprunt,Etudiantenseignant etudiantenseignant){		
 		int choix;
 			System.out.println("1:consulter le catalogue");
 		System.out.println("2:Rechercher un livre");
@@ -35,26 +36,26 @@ public class Bibliotheque {
 			switch(choix){
 	
 	case 1:
-	livre.ConsulterCatalogue(connecter());
+	etudiantenseignant.ConsulterCatalogue(connecter());
 	break;
 	case 2:
-	livre.rechercherunlivre();
+	etudiantenseignant.rechercherunlivre();
 	break;
 	case 3:
-	livre.rechercherunlivre();
+	livre.afficherdetaildunlivre();
 	break;
 	case 4:
-	emprunt.gestionempruntretour(user);
+	etudiantenseignant.gestionempruntretour(user);
 	break;
 	case 5:
-	emprunt.historiquedesemprunts(user);
+	etudiantenseignant.historiquedesemprunts(user);
 	break;
 	case 0:
 	System.exit(1);
 
 }
 			if(choix!=0){
-		menuEtudiantEnseignant(user,livre,emprunt);
+		menuEtudiantEnseignant(user,livre,emprunt,etudiantenseignant);
 	}
 	}
 
@@ -72,7 +73,7 @@ public class Bibliotheque {
 		}
 if(choix !=0){
 	menuBibliothequaire(bibliothequaire);
-}
+}	
 	}
 
 
@@ -82,16 +83,19 @@ public static void main(String[]args) {
 	Utilisateur user=new Utilisateur();
 	Livre livre=new Livre();
 	Emprunt emprunt=new Emprunt();
-	Bibliothequaire bibliothequaire=new Bibliothequaire();
+	
+	
 	try {
 		 Class.forName("com.mysql.cj.jdbc.Driver");
 		user.connecter();
 		Utilisateur utilisateur=user.authentifier();		
 		if(utilisateur.getrole().equals("etudiant")|| utilisateur.getrole().equals("enseignant")){
-			biblio.menuEtudiantEnseignant(utilisateur,livre,emprunt);
-			
+			Etudiantenseignant etudenseignant=new Etudiantenseignant();
+			biblio.menuEtudiantEnseignant(utilisateur,livre,emprunt,etudenseignant);
+	
 		}
 		else{
+			Bibliothequaire bibliothequaire=new Bibliothequaire();
 			biblio.menuBibliothequaire(bibliothequaire);
 		}
 	}

@@ -98,7 +98,8 @@ public class Livre {
     }
     return cat;
 }
-    	public Livre rechercherunlivre(){
+     
+    	public Livre afficherdetaildunlivre(){
 		Scanner scanner=new Scanner(System.in);
 		System.out.println("entrer l'id");
 		int id=scanner.nextInt();
