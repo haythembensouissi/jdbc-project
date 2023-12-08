@@ -8,7 +8,7 @@ public class Livre {
     private String titre;
     private String auteur;
     private String genre;
-    private boolean disponibilite;
+    private String disponibilite;
 
     public int getIdLivre() {
         return idLivre;
@@ -42,11 +42,11 @@ public class Livre {
         this.genre = genre;
     }
 
-    public boolean isDisponibilite() {
+    public String isDisponibilite() {
         return disponibilite;
     }
 
-    public void setDisponibilite(boolean disponibilite) {
+    public void setDisponibilite(String disponibilite) {
         this.disponibilite = disponibilite;
     }
     public void Afficher() {
@@ -57,6 +57,8 @@ public class Livre {
         System.out.print("l'auteur: "+this.auteur+" ");
 
         System.out.println("le genre: "+this.genre+" ");
+
+		System.out.println("disponibilité :"+this.disponibilite);
 
        
     }
@@ -84,7 +86,7 @@ public class Livre {
             livre.setTitre(resultSet.getString("titre"));
             livre.setAuteur(resultSet.getString("auteur"));
             livre.setGenre(resultSet.getString("genre"));
-            livre.setDisponibilite(resultSet.getBoolean("disponibilité"));
+            livre.setDisponibilite(resultSet.getString("disponibilité"));
             cat[i]=livre;
             i++;
         }
@@ -98,6 +100,31 @@ public class Livre {
     }
     return cat;
 }
+ public Livre rechercherunlivre(){
+            Scanner scanner=new Scanner(System.in);
+		System.out.println("entrer l'id");
+		int id=scanner.nextInt();
+		Connection connection=connecter();
+		Livre livre=new Livre();
+        		try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM LIVRE WHERE id_livre=?")) {
+			ps.setInt(1, id);
+		ResultSet rs=ps.executeQuery();
+		if(rs.next()){
+			livre.setIdLivre(rs.getInt("id_livre"));
+			livre.setTitre(rs.getString("titre"));
+			livre.setAuteur(rs.getString("auteur"));
+			livre.setGenre(rs.getString("genre"));
+			livre.setDisponibilite(rs.getString("disponibilité"));
+			System.out.println("le livre existe");
+			
+		}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("le livre n'existe pas");
+		}
+
+		return livre;
+        }
      
     	public Livre afficherdetaildunlivre(){
 		Scanner scanner=new Scanner(System.in);
@@ -113,13 +140,9 @@ public class Livre {
 			livre.setTitre(rs.getString("titre"));
 			livre.setAuteur(rs.getString("auteur"));
 			livre.setGenre(rs.getString("genre"));
+						livre.setDisponibilite(rs.getString("disponibilité"));
 			livre.Afficher();
-			if (rs.getBoolean("disponibilité")==true) {
-				System.out.println("le livre existe");
-			}
-			else{
-				System.out.println("le livre n'existe pas");
-			}
+			
 		}
 		} catch (SQLException e) {
 			e.printStackTrace();

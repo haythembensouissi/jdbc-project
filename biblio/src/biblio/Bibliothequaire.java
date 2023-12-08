@@ -55,4 +55,38 @@ public class Bibliothequaire extends Utilisateur {
         }
         return rapport;
     }
-}
+     public static void notification(Connection connection) {
+        System.out.println("entrer l'id de l'utilisateur");
+        int id=scanner.nextInt();
+    	String qr = "SELECT * FROM Emprunt WHERE id_utilisateur = ? AND status = 'en cours' AND date_retour < NOW()";
+    	try(PreparedStatement pr=connection.prepareStatement(qr)){
+    		pr.setInt(1,id);
+    		try (PreparedStatement ps1=connection.prepareStatement("SELECT * from utilisateur where id_utilisateur=?")) {
+                ps1.setInt(1, id);
+                ResultSet rs1=ps1.executeQuery();
+                Utilisateur user=new Utilisateur();
+                if(rs1.next()){
+                    user.setid(rs1.getInt(1));
+                user.setlogin(rs1.getString("login"));
+                user.setnom(rs1.getString("nom"));
+                ResultSet rs = pr.executeQuery();
+    			while(rs.next()) {
+    				System.out.println("Rappellllee pour l'email : "+user.getlogin()+" le livre emprunté doit etre retourné");
+                }
+
+                }
+                            } catch (Exception e) {
+                // TODO: handle exception
+            }
+    		
+    			} catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+    		}
+    		
+    		
+    	
+    }
+
+
